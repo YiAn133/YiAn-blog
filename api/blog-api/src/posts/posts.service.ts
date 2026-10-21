@@ -5,6 +5,7 @@ import { Post } from './entities/post.entity.js';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import slugify from 'slugify'
+import { ParseIntPipe } from '@nestjs/common';
 
 @Injectable()
 export class PostsService {
@@ -19,15 +20,17 @@ export class PostsService {
       throw new HttpException("标题不能为空",401)
     }
 
-    const findPosts = await this.postRepository.find({where:{title}})
-    if(!findPosts){
+    const findPosts = await this.postRepository.findOne({where:{title}})
+    if(findPosts){
       throw new HttpException("文章已经存在",401)
     }
-
-    const slug = slugify(createPost.title, { lower: true,strict:true ,replacement:"-"});
+    // 这个是用来进行url搜索的
+    // const slug = slugify(createPost.title, { lower: true,strict:true ,replacement:"-"});
+    // console.log(slug);
+    
     const postEntity =  this.postRepository.create({
       ...createPost,
-      slug
+      
     })
     return await this.postRepository.save(postEntity);
   }
@@ -53,18 +56,21 @@ export class PostsService {
     if(!findPost){
       throw new HttpException("要修改的文章不存在",401)
     }
-    const slug = slugify(updatePost.title,{ lower: true,strict:true ,replacement:"-"})
+    // const slug = slugify(updatePost.title,{ lower: true,strict:true ,replacement:"-"})
     const postEntity = this.postRepository.create({
       ...updatePost,
-      slug
+      // slug
     })
 
-    const update =  this.postRepository.merge(postEntity , findPost)
+    const update =  this.postRepository.merge(findPost ,postEntity )
     return this.postRepository.save(update)
   }
 
   // 删除文章
   async remove(id: number) {
+    if(isNaN(id)){
+      throw new HttpException("要删除的文章id必须是合法数字",401)
+    }
     const findPost = await this.postRepository.findOne({where:{id}})
     if(!findPost){
       throw new HttpException("要删除的文章不存在",401)

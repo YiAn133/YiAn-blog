@@ -17,8 +17,8 @@ export class Post {
   title: string;
 
   // 表示URL的别名 由标题生成 用于网页路由访问
-  @Column({ length: 200, unique: true })
-  slug: string;
+  @Column({ type:'varchar' ,nullable:true})
+  slug: string | null;
 
   @Column({ type: 'longtext' })
   content: string;

@@ -4,8 +4,10 @@ import { AppService } from './app.service.js';
 import { PostsModule } from './posts/posts.module.js';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule,ConfigService } from '@nestjs/config';
-
+import { JwtAuthGuard } from './auth/jwt-auth/jwt-auth.guard.js';
 import {Post} from './posts/entities/post.entity.js'
+import { AuthModule } from './auth/auth.module.js';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -28,9 +30,14 @@ import {Post} from './posts/entities/post.entity.js'
         timezone: 'Z',
         charset: 'utf8mb4',
       }),
-    })],
+    }),
+    
+  AuthModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,{
+    provide:APP_GUARD,
+    useClass:JwtAuthGuard
+  }],
 
 })
 export class AppModule {}

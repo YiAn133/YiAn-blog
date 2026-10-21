@@ -7,5 +7,5 @@ export class CreatePostDto {
     @IsString()
     content:string
 
-
+   
 }
